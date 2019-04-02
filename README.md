@@ -1,2 +1,2 @@
-# laravel_sistema_ventas
+# Sistema de ventas
 Sistema desarrollado con laravel y vuejs
