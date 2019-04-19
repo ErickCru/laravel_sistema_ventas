@@ -11,8 +11,10 @@ use App\Persona;
 class ProveedorController extends Controller
 {
     public function index(Request $request)
-    { 
-        if(!$request->ajax()) {return redirect('/');}
+    {
+        if (!$request->ajax()) {
+            return redirect('/');
+        }
         $buscar = $request->buscar;
         $criterio = $request->criterio;
         /*
@@ -20,20 +22,37 @@ class ProveedorController extends Controller
             $categorias = DB::table('categorias')->paginate(2);
         */
         //Usando Eloquent
-        if($buscar==''){
+        if ($buscar == '') {
             $personas = Proveedor::join('personas', 'proveedores.id', 'personas.id')
-            ->select('personas.id', 'personas.nombre', 'personas.tipo_documento', 'personas.num_documento', 'personas.direccion',
-                    'personas.telefono', 'personas.email', 'proveedores.contacto', 'proveedores.telefono_contacto')
-            ->orderBy('personas.id','desc')->paginate(3);
+                ->select(
+                    'personas.id',
+                    'personas.nombre',
+                    'personas.tipo_documento',
+                    'personas.num_documento',
+                    'personas.direccion',
+                    'personas.telefono',
+                    'personas.email',
+                    'proveedores.contacto',
+                    'proveedores.telefono_contacto'
+                )
+                ->orderBy('personas.id', 'desc')->paginate(3);
+        } else {
+            $personas = Proveedor::join('personas', 'proveedores.id', 'personas.id')
+                ->select(
+                    'personas.id',
+                    'personas.nombre',
+                    'personas.tipo_documento',
+                    'personas.num_documento',
+                    'personas.direccion',
+                    'personas.telefono',
+                    'personas.email',
+                    'proveedores.contacto',
+                    'proveedores.telefono_contacto'
+                )
+                ->where('personas.' . $criterio, 'like', '%' . $buscar . '%')
+                ->orderBy('id', 'desc')->paginate(3);
         }
-        else{
-            $personas= Proveedor::join('personas', 'proveedores.id', 'personas.id')
-            ->select('personas.id', 'personas.nombre', 'personas.tipo_documento', 'personas.num_documento', 'personas.direccion',
-                    'personas.telefono', 'personas.email', 'proveedores.contacto', 'proveedores.telefono_contacto')
-            ->where('personas.'.$criterio, 'like', '%'. $buscar . '%')
-            ->orderBy('id','desc')->paginate(3);
-        }
-        
+
         return [
             'pagination' => [
                 'total'        => $personas->total(),
@@ -45,15 +64,30 @@ class ProveedorController extends Controller
             ],
             'personas' => $personas
         ];
-            
-
     }
 
+    public function selectProveedor(Request $request)
+    {
+        if (!$request->ajax()) {
+            return redirect('/');
+        }
+
+        $filtro = $request->filtro;
+        $proveedores = Proveedor::join('personas', 'proveedores.id', 'personas.id')
+            ->where('personas.nombre', 'like', '%' . $filtro . '%')
+            ->orWhere('personas.num_documento', 'like', '%' . $filtro . '%')
+            ->select('personas.id', 'personas.nombre', 'personas.num_documento')
+            ->orderBy('personas.nombre', 'asc')->get();
+
+        return ['proveedores' => $proveedores];
+    }
     public function store(Request $request)
     {
-        if(!$request->ajax()) {return redirect('/');}
+        if (!$request->ajax()) {
+            return redirect('/');
+        }
 
-        try{
+        try {
             DB::beginTransaction();
             $persona = new Persona();
             $persona->nombre = $request->nombre;
@@ -73,19 +107,18 @@ class ProveedorController extends Controller
             $proveedor->save();
 
             DB::commit();
-
-        } catch(Exception $e){
+        } catch (Exception $e) {
             DB::rollBack();
         }
-
-        
     }
 
     public function update(Request $request)
     {
-        if(!$request->ajax()) {return redirect('/');}
-       
-        try{ 
+        if (!$request->ajax()) {
+            return redirect('/');
+        }
+
+        try {
             DB::beginTransaction();
 
             //Buscar al proveedor
@@ -106,10 +139,8 @@ class ProveedorController extends Controller
             $proveedor->save();
 
             DB::commit();
-
-        } catch(Exception $e){
+        } catch (Exception $e) {
             DB::rollBack();
         }
-
     }
 }

@@ -16,7 +16,7 @@
                 </template>
 
                 <template v-else-if="menu==3">
-                    <h1>Ingresos</h1>
+                    <ingreso></ingreso>
                 </template>
 
                 <template v-else-if="menu==4">
@@ -84,7 +84,7 @@
                 </template>
 
                 <template v-else-if="menu==3">
-                    <h1>Ingresos</h1>
+                    <ingreso></ingreso>
                 </template>
 
                 <template v-else-if="menu==4">
