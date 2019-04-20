@@ -10,7 +10,7 @@
       <!-- Ejemplo de tabla Listado -->
       <div class="card">
         <div class="card-header">
-          <i class="fa fa-align-justify"></i> Ingresos
+          <i class="fa fa-align-justify"></i> Ventas
           <button type="button" @click="mostrarDetalle()" class="btn btn-secondary">
             <i class="icon-plus"></i>&nbsp;Nuevo
           </button>
@@ -30,13 +30,13 @@
                   <input
                     type="text"
                     v-model="buscar"
-                    @keyup.enter="listarIngreso(1,buscar,criterio)"
+                    @keyup.enter="listarVenta(1,buscar,criterio)"
                     class="form-control"
                     placeholder="Texto a buscar"
                   >
                   <button
                     type="submit"
-                    @click="listarIngreso(1,buscar,criterio)"
+                    @click="listarVenta(1,buscar,criterio)"
                     class="btn btn-primary"
                   >
                     <i class="fa fa-search"></i> Buscar
@@ -50,7 +50,7 @@
                   <tr>
                     <th>Opciones</th>
                     <th>Usuario</th>
-                    <th>Proveedor</th>
+                    <th>Cliente</th>
                     <th>Tipo Comprobante</th>
                     <th>Serie Comprobante</th>
                     <th>Número Comprobante</th>
@@ -61,34 +61,34 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="ingreso in arrayIngreso" :key="ingreso.id">
+                  <tr v-for="venta in arrayVenta" :key="venta.id">
                     <td>
                       <button
                         type="button"
-                        @click="verIngreso(ingreso.id)"
+                        @click="verVenta(venta.id)"
                         class="btn btn-success btn-sm"
                       >
                         <i class="icon-eye"></i>
                       </button>&nbsp;
-                      <template v-if="ingreso.estado=='Registrado'">
+                      <template v-if="venta.estado=='Registrado'">
                         <button
                           type="button"
                           class="btn btn-danger btn-sm"
-                          @click="desactivarIngreso(ingreso.id)"
+                          @click="desactivarVenta(venta.id)"
                         >
                           <i class="icon-trash"></i>
                         </button>
                       </template>
                     </td>
-                    <td v-text="ingreso.usuario"></td>
-                    <td v-text="ingreso.nombre"></td>
-                    <td v-text="ingreso.tipo_comprobante"></td>
-                    <td v-text="ingreso.serie_comprobante"></td>
-                    <td v-text="ingreso.num_comprobante"></td>
-                    <td v-text="ingreso.fecha_hora"></td>
-                    <td v-text="ingreso.total"></td>
-                    <td v-text="ingreso.impuesto"></td>
-                    <td v-text="ingreso.estado"></td>
+                    <td v-text="venta.usuario"></td>
+                    <td v-text="venta.nombre"></td>
+                    <td v-text="venta.tipo_comprobante"></td>
+                    <td v-text="venta.serie_comprobante"></td>
+                    <td v-text="venta.num_comprobante"></td>
+                    <td v-text="venta.fecha_hora"></td>
+                    <td v-text="venta.total"></td>
+                    <td v-text="venta.impuesto"></td>
+                    <td v-text="venta.estado"></td>
                   </tr>
                 </tbody>
               </table>
@@ -127,19 +127,20 @@
           </div>
         </template>
         <!-- Fin ejemplo tabla Listado -->
+
         <!-- Detalle -->
         <template v-else-if="listado==0">
           <div class="card-body">
             <div class="form-group row border">
               <div class="col-md-9">
                 <div class="form-group">
-                  <label>Proveedor(*)</label>
+                  <label>Cliente(*)</label>
                   <v-select
-                    @search="selectProveedor"
+                    @search="selectCliente"
                     label="nombre"
-                    :options="arrayProveedor"
-                    placeholder="Buscar Proveedores..."
-                    @input="getDatosProveedor"
+                    :options="arrayCliente"
+                    placeholder="Buscar Clientes..."
+                    @input="getDatosCliente"
                   ></v-select>
                 </div>
               </div>
@@ -181,16 +182,16 @@
                 </div>
               </div>
               <div class="col-md-12">
-                <div v-show="errorIngreso" class="form-group row div-error">
+                <div v-show="errorVenta" class="form-group row div-error">
                   <div class="text-center text-error">
-                    <div v-for="error in errorMostrarMsjIngreso" :key="error" v-text="error"></div>
+                    <div v-for="error in errorMostrarMsjVenta" :key="error" v-text="error"></div>
                   </div>
                 </div>
               </div>
             </div>
 
             <div class="form-group row border">
-              <div class="col-md-6">
+              <div class="col-md-4">
                 <div class="form-grop">
                   <label for>
                     Articulo
@@ -234,7 +235,13 @@
                     Cantidad
                     <span style="color:red;" v-show="cantidad==0">(*Ingrese)</span>
                   </label>
-                  <input type="number" value="0" class="form-control" v-model="cantidad">
+                  <input type="number" value="0" min="0" class="form-control" v-model="cantidad">
+                </div>
+              </div>
+              <div class="col-md-2">
+                <div class="form-grou">
+                  <label for>Descuento</label>
+                  <input type="number" value="0" min="0" class="form-control" v-model="descuento">
                 </div>
               </div>
             </div>
@@ -247,6 +254,7 @@
                     <th>Articulo</th>
                     <th>Precio</th>
                     <th>Cantidad</th>
+                    <th>descuento</th>
                     <th>Subtotal</th>
                   </thead>
                   <tbody v-if="arrayDetalle.length">
@@ -262,37 +270,43 @@
                       </td>
                       <td v-text="detalle.articulo"></td>
                       <td>
+                        <input v-model="detalle.precio" min="0" type="number" class="form-control">
+                      </td>
+                      <td>
+                        <span
+                          style="color: red;"
+                          v-show="detalle.cantidad>detalle.stock"
+                        >Stock: {{ detalle.stock }}</span>
                         <input
-                          v-model="detalle.precio"
+                          v-model="detalle.cantidad"
+                          min="0"
                           type="number"
-                          value="3"
                           class="form-control"
                         >
                       </td>
                       <td>
-                        <input
-                          v-model="detalle.cantidad"
-                          type="number"
-                          value="2"
-                          class="form-control"
-                        >
+                        <span
+                          style="color: red;"
+                          v-show="detalle.descuento>(detalle.precio * detalle.cantidad)"
+                        >Descuento superior.</span>
+                        <input v-model="detalle.descuento" type="number" class="form-control">
                       </td>
-                      <td>{{ detalle.precio * detalle.cantidad}}</td>
+                      <td>{{ detalle.precio * detalle.cantidad - detalle.descuento}}</td>
                     </tr>
                     <tr>
-                      <td colspan="4" class="td-right">
+                      <td colspan="5" class="td-right">
                         <strong>Total Parcial:</strong>
                       </td>
                       <td>$ {{ totalParcial = (total-totalImpuesto).toFixed(2) }}</td>
                     </tr>
                     <tr>
-                      <td colspan="4" class="td-right">
+                      <td colspan="5" class="td-right">
                         <strong>Total Impuesto:</strong>
                       </td>
                       <td>$ {{ totalImpuesto = ((total*impuesto)/(1+impuesto)).toFixed(2) }}</td>
                     </tr>
                     <tr>
-                      <td colspan="4" class="td-right">
+                      <td colspan="5" class="td-right">
                         <strong>Total Neto:</strong>
                       </td>
                       <td>$ {{ total = calcularTotal }}</td>
@@ -300,7 +314,7 @@
                   </tbody>
                   <tbody v-else>
                     <tr>
-                      <td colspan="5">No hay artículos agregados</td>
+                      <td colspan="6">No hay artículos agregados</td>
                     </tr>
                   </tbody>
                 </table>
@@ -313,22 +327,22 @@
                 <button
                   type="button"
                   class="btn btn-primary"
-                  @click="registrarIngreso()"
-                >Registrar Compra</button>
+                  @click="registrarVenta()"
+                >Registrar Venta</button>
               </div>
             </div>
           </div>
         </template>
         <!-- Fin Detalle -->
 
-        <!-- Ver ingreso -->
+        <!-- Ver venta -->
         <template v-else-if="listado==2">
           <div class="card-body">
             <div class="form-group row border">
               <div class="col-md-9">
                 <div class="form-group">
-                  <label>Proveedor</label>
-                  <p v-text="proveedor"></p>
+                  <label>Cliente</label>
+                  <p v-text="cliente"></p>
                 </div>
               </div>
               <div class="col-md-3">
@@ -362,6 +376,7 @@
                   <th>Articulo</th>
                   <th>Precio</th>
                   <th>Cantidad</th>
+                  <th>Descuento</th>
                   <th>Subtotal</th>
                 </thead>
                 <tbody v-if="arrayDetalle.length">
@@ -369,22 +384,23 @@
                     <td v-text="detalle.articulo"></td>
                     <td v-text="detalle.precio"></td>
                     <td v-text="detalle.cantidad"></td>
-                    <td>{{ detalle.precio * detalle.cantidad}}</td>
+                    <td v-text="detalle.descuento"></td>
+                    <td>{{ detalle.precio * detalle.cantidad - detalle.descuento }}</td>
                   </tr>
                   <tr class="tr-right">
-                    <td colspan="3">
+                    <td colspan="4">
                       <strong>Total Parcial:</strong>
                     </td>
                     <td>$ {{ totalParcial = (total-totalImpuesto).toFixed(2) }}</td>
                   </tr>
                   <tr class="tr-right">
-                    <td colspan="3">
+                    <td colspan="4">
                       <strong>Total Impuesto:</strong>
                     </td>
                     <td>$ {{ totalImpuesto = (total*impuesto).toFixed(2) }}</td>
                   </tr>
                   <tr class="tr-right">
-                    <td colspan="3">
+                    <td colspan="4">
                       <strong>Total Neto:</strong>
                     </td>
                     <td>$ {{total}}</td>
@@ -404,7 +420,7 @@
             </div>
           </div>
         </template>
-        <!-- Fin Ver ingreso -->
+        <!-- Fin Ver venta -->
       </div>
       <!-- Fin ejemplo de tabla Listado -->
     </div>
@@ -525,11 +541,10 @@ import "vue-select/dist/vue-select.css";
 export default {
   data() {
     return {
-      ingreso_id: 0,
-      idproveedor: 0,
-      proveedor: "",
+      venta_id: 0,
+      idcliente: 0,
+      cliente: "",
       idarticulo: 0,
-      nombre: "",
       tipo_comprobante: "BOLETA",
       serie_comprobante: "",
       num_comprobante: "",
@@ -539,9 +554,11 @@ export default {
       totalParcial: 0.0,
       precio: 0,
       cantidad: 0,
-      arrayIngreso: [],
+      descuento: 0,
+      stock: 0,
+      arrayVenta: [],
       arrayDetalle: [],
-      arrayProveedor: [],
+      arrayCliente: [],
       arrayArticulo: [],
       codigo: "",
       articulo: "",
@@ -549,8 +566,8 @@ export default {
       modal: 0,
       tituloModal: "",
       tipoAccion: 0,
-      errorIngreso: 0,
-      errorMostrarMsjIngreso: [],
+      errorVenta: 0,
+      errorMostrarMsjVenta: [],
       pagination: {
         total: 0,
         current_page: 0,
@@ -599,7 +616,8 @@ export default {
       for (var i = 0; i < this.arrayDetalle.length; i++) {
         resultado =
           resultado +
-          this.arrayDetalle[i].precio * this.arrayDetalle[i].cantidad;
+          this.arrayDetalle[i].precio * this.arrayDetalle[i].cantidad -
+          this.arrayDetalle[i].descuento;
       }
       return resultado;
     }
@@ -608,26 +626,26 @@ export default {
     "v-select": vSelect
   },
   methods: {
-    listarIngreso(page, buscar, criterio) {
+    listarVenta(page, buscar, criterio) {
       let me = this;
       var url =
-        "/ingreso?page=" + page + "&buscar=" + buscar + "&criterio=" + criterio;
+        "/venta?page=" + page + "&buscar=" + buscar + "&criterio=" + criterio;
       axios
         .get(url)
         .then(function(response) {
           // handle success
           var respuesta = response.data;
-          if (respuesta.ingresos.data.length != 0 || buscar == "") {
-            me.arrayIngreso = respuesta.ingresos.data;
+          if (respuesta.ventas.data.length != 0 || buscar == "") {
+            me.arrayVenta = respuesta.ventas.data;
             me.pagination = respuesta.pagination;
           } else {
             Swal.fire({
               type: "error",
               title: "Oops...",
-              text: "No se encontró ningún registro con ese dato",
+              text: "No se encontró ninguna venta con ese dato",
               footer: "Intente con otro dato."
             });
-            me.arrayIngreso = respuesta.ingresos.data;
+            me.arrayVenta = respuesta.ventas.data;
             me.pagination = respuesta.pagination;
           }
         })
@@ -636,32 +654,32 @@ export default {
           console.log(error);
         });
     },
-    selectProveedor(search, loading) {
+    selectCliente(search, loading) {
       let me = this;
       loading(true);
 
-      var url = "/proveedor/selectProveedor?filtro=" + search;
+      var url = "/cliente/selectCliente?filtro=" + search;
       axios
         .get(url)
         .then(function(response) {
           let respuesta = response.data;
           q: search;
-          me.arrayProveedor = respuesta.proveedores;
+          me.arrayCliente = respuesta.clientes;
           loading(false);
         })
         .catch(function(error) {
           console.log(error);
         });
     },
-    getDatosProveedor(val1) {
+    getDatosCliente(val1) {
       let me = this;
       me.loading = true;
-      me.idproveedor = val1.id;
+      me.idcliente = val1.id;
     },
     buscarArticulo() {
       let me = this;
 
-      var url = "/articulo/buscarArticulo?filtro=" + me.codigo;
+      var url = "/articulo/buscarArticuloVenta?filtro=" + me.codigo;
       axios
         .get(url)
         .then(function(response) {
@@ -671,6 +689,8 @@ export default {
           if (me.arrayArticulo.length > 0) {
             me.articulo = me.arrayArticulo[0]["nombre"];
             me.idarticulo = me.arrayArticulo[0]["id"];
+            me.precio = me.arrayArticulo[0]["precio_venta"];
+            me.stock = me.arrayArticulo[0]["stock"];
           } else {
             me.articulo = "No existe artículo";
             me.idarticulo = 0;
@@ -683,7 +703,7 @@ export default {
     cambiarPagina(page, buscar, criterio) {
       let me = this;
       me.pagination.current_page = page;
-      me.listarIngreso(page, buscar, criterio);
+      me.listarVenta(page, buscar, criterio);
     },
     encuentra(id) {
       var sw = 0;
@@ -710,17 +730,29 @@ export default {
             footer: "Puede modificar los valores en la tabla de abajo."
           });
         } else {
-          me.arrayDetalle.push({
-            idarticulo: me.idarticulo,
-            articulo: me.articulo,
-            cantidad: me.cantidad,
-            precio: me.precio
-          });
-          me.codigo = "";
-          me.idarticulo = 0;
-          me.articulo = "";
-          me.precio = 0;
-          me.cantidad = 0;
+          if (me.cantidad > me.stock) {
+            Swal.fire({
+              type: "error",
+              title: "Oops...",
+              text: "No hay stock disponible!"
+            });
+          } else {
+            me.arrayDetalle.push({
+              idarticulo: me.idarticulo,
+              articulo: me.articulo,
+              cantidad: me.cantidad,
+              precio: me.precio,
+              descuento: me.descuento,
+              stock: me.stock
+            });
+            me.codigo = "";
+            me.idarticulo = 0;
+            me.articulo = "";
+            me.precio = 0;
+            me.cantidad = 0;
+            me.descuento = 0;
+            me.stock = 0;
+          }
         }
       }
     },
@@ -738,14 +770,19 @@ export default {
           idarticulo: data["id"],
           articulo: data["nombre"],
           cantidad: 1,
-          precio: 1
+          precio: data["precio_venta"],
+          descuento: 0,
+          stock: data["stock"]
         });
       }
     },
     listarArticulo(buscar, criterio) {
       let me = this;
       var url =
-        "/articulo/listarArticulo?buscar=" + buscar + "&criterio=" + criterio;
+        "/articulo/listarArticulosVenta?buscar=" +
+        buscar +
+        "&criterio=" +
+        criterio;
       axios
         .get(url)
         .then(function(response) {
@@ -768,15 +805,15 @@ export default {
           console.log(error);
         });
     },
-    registrarIngreso() {
-      if (this.validarIngreso()) {
+    registrarVenta() {
+      if (this.validarVenta()) {
         return;
       }
 
       let me = this;
       axios
-        .post("/ingreso/registrar", {
-          idproveedor: this.idproveedor,
+        .post("/venta/registrar", {
+          idcliente: this.idcliente,
           tipo_comprobante: this.tipo_comprobante,
           serie_comprobante: this.serie_comprobante,
           num_comprobante: this.num_comprobante,
@@ -786,8 +823,8 @@ export default {
         })
         .then(function(response) {
           me.listado = 1;
-          me.listarIngreso(1, "", "num_comprobante");
-          me.idproveedor = 0;
+          me.listarVenta(1, "", "num_comprobante");
+          me.idcliente = 0;
           me.tipo_comprobante = "BOLETA";
           me.serie_comprobante = "";
           me.num_comprobante = "";
@@ -797,30 +834,46 @@ export default {
           me.articulo = "";
           me.cantidad = 0;
           me.precio = 0;
+          me.stock = 0;
+          me.codigo = "";
+          me.descuento = 0;
           me.arrayDetalle = [];
         })
         .catch(function(error) {
           console.log(error);
         });
     },
-    validarIngreso() {
-      this.errorIngreso = 0;
-      this.errorMostrarMsjIngreso = [];
+    validarVenta() {
+      let me = this;
+      me.errorVenta = 0;
+      me.errorMostrarMsjVenta = [];
+      var art;
 
-      if (this.idproveedor == 0)
-        this.errorMostrarMsjIngreso.push("Seleccione un proveedor.");
-      if (this.tipo_comprobante == 0)
-        this.errorMostrarMsjIngreso.push("Seleccione el comprobante");
-      if (this.num_comprobante == "")
-        this.errorMostrarMsjIngreso.push("Ingrese el número de comprobante");
-      if (this.impuesto == 0)
-        this.errorMostrarMsjIngreso.push("Ingrese el impuesto de compra.");
-      if (this.arrayDetalle.length <= 0)
-        this.errorMostrarMsjIngreso.push("Ingrese detalles");
+      me.arrayDetalle.map(function(x) {
+        if (x.cantidad > x.stock) {
+          art = x.articulo + " con stock insuficiente.";
+          me.errorMostrarMsjVenta.push(art);
+        }
+        if (x.precio * x.cantidad < x.descuento) {
+          art = x.articulo + " el descuento no puede ser mayor al subtotal.";
+          me.errorMostrarMsjVenta.push(art);
+        }
+      });
 
-      if (this.errorMostrarMsjIngreso.length) this.errorIngreso = 1;
+      if (me.idcliente == 0)
+        me.errorMostrarMsjVenta.push("Seleccione un cliente.");
+      if (me.tipo_comprobante == 0)
+        me.errorMostrarMsjVenta.push("Seleccione el comprobante");
+      if (me.num_comprobante == "")
+        me.errorMostrarMsjVenta.push("Ingrese el número de comprobante");
+      if (me.impuesto == 0)
+        me.errorMostrarMsjVenta.push("Ingrese el impuesto de compra.");
+      if (me.arrayDetalle.length <= 0)
+        me.errorMostrarMsjVenta.push("Ingrese detalles");
 
-      return this.errorIngreso;
+      if (me.errorMostrarMsjVenta.length) me.errorVenta = 1;
+
+      return me.errorVenta;
     },
     mostrarDetalle() {
       let me = this;
@@ -840,26 +893,26 @@ export default {
     ocultarDetalle() {
       this.listado = 1;
     },
-    verIngreso(id) {
+    verVenta(id) {
       let me = this;
       this.listado = 2;
       //obtener los datos del ingreso
-      var arrayIngresoT = [];
-      var url = "/ingreso/obtenerCabecera?id=" + id;
+      var arrayVentaT = [];
+      var url = "/venta/obtenerCabecera?id=" + id;
       axios
         .get(url)
         .then(function(response) {
           // handle success
           var respuesta = response.data;
 
-          arrayIngresoT = respuesta.ingreso;
+          arrayVentaT = respuesta.venta;
 
-          me.proveedor = arrayIngresoT[0]["nombre"];
-          me.tipo_comprobante = arrayIngresoT[0]["tipo_comprobante"];
-          me.serie_comprobante = arrayIngresoT[0]["serie_comprobante"];
-          me.num_comprobante = arrayIngresoT[0]["num_comprobante"];
-          me.impuesto = arrayIngresoT[0]["impuesto"];
-          me.total = arrayIngresoT[0]["total"];
+          me.cliente = arrayVentaT[0]["nombre"];
+          me.tipo_comprobante = arrayVentaT[0]["tipo_comprobante"];
+          me.serie_comprobante = arrayVentaT[0]["serie_comprobante"];
+          me.num_comprobante = arrayVentaT[0]["num_comprobante"];
+          me.impuesto = arrayVentaT[0]["impuesto"];
+          me.total = arrayVentaT[0]["total"];
         })
         .catch(function(error) {
           // handle error
@@ -867,7 +920,7 @@ export default {
         });
       // Obtener los datos de los detalles
 
-      var urld = "/ingreso/obtenerDetalles?id=" + id;
+      var urld = "/venta/obtenerDetalles?id=" + id;
       axios
         .get(urld)
         .then(function(response) {
@@ -882,6 +935,7 @@ export default {
     },
     abrirModal() {
       this.arrayArticulo = [];
+      this.buscarA = "";
       this.modal = 1;
       this.tituloModal = "Seleccione uno o varios artículos";
     },
@@ -890,7 +944,7 @@ export default {
       this.modal = 0;
       this.titulo = 0;
     },
-    desactivarIngreso(id) {
+    desactivarVenta(id) {
       const swalWithBootstrapButtons = Swal.mixin({
         customClass: {
           confirmButton: "btn btn-success",
@@ -901,7 +955,7 @@ export default {
 
       swalWithBootstrapButtons
         .fire({
-          title: "¿Esta seguro de anular este ingreso?",
+          title: "¿Esta seguro de anular esta venta?",
           type: "warning",
           showCancelButton: true,
           confirmButtonText: "Acepto",
@@ -912,12 +966,12 @@ export default {
           if (result.value) {
             let me = this;
             axios
-              .put("/ingreso/desactivar", {
+              .put("/venta/desactivar", {
                 id: id
               })
               .then(function(response) {
                 // handle success
-                me.listarIngreso(1, "", "num_comprobante");
+                me.listarVenta(1, "", "num_comprobante");
                 swalWithBootstrapButtons.fire(
                   "¡Desactivado!",
                   "El ingreso ha sido desactivado exitosamente.",
@@ -937,7 +991,7 @@ export default {
     }
   },
   mounted() {
-    this.listarIngreso(1, this.buscar, this.criterio);
+    this.listarVenta(1, this.buscar, this.criterio);
   }
 };
 </script>

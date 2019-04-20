@@ -98,7 +98,7 @@ class IngresoController extends Controller
 
     public function obtenerDetalles(Request $request)
     {
-        // if (!$request->ajax()) return redirect('/');
+        if (!$request->ajax()) return redirect('/');
 
         $id = $request->id;
 

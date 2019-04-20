@@ -8,8 +8,10 @@ use App\Persona;
 class ClienteController extends Controller
 {
     public function index(Request $request)
-    { 
-        if(!$request->ajax()) {return redirect('/');}
+    {
+        if (!$request->ajax()) {
+            return redirect('/');
+        }
         $buscar = $request->buscar;
         $criterio = $request->criterio;
         /*
@@ -17,13 +19,12 @@ class ClienteController extends Controller
             $categorias = DB::table('categorias')->paginate(2);
         */
         //Usando Eloquent
-        if($buscar==''){
-            $personas = Persona::orderBy('id','desc')->paginate(3);
+        if ($buscar == '') {
+            $personas = Persona::orderBy('id', 'desc')->paginate(3);
+        } else {
+            $personas = Persona::where($criterio, 'like', '%' . $buscar . '%')->orderBy('id', 'desc')->paginate(3);
         }
-        else{
-            $personas = Persona::where($criterio, 'like', '%'. $buscar . '%')->orderBy('id','desc')->paginate(3);
-        }
-        
+
         return [
             'pagination' => [
                 'total'        => $personas->total(),
@@ -35,13 +36,13 @@ class ClienteController extends Controller
             ],
             'personas' => $personas
         ];
-            
-
     }
 
     public function store(Request $request)
     {
-        if(!$request->ajax()) {return redirect('/');}
+        if (!$request->ajax()) {
+            return redirect('/');
+        }
         $persona = new Persona();
         $persona->nombre = $request->nombre;
         $persona->tipo_documento = $request->tipo_documento;
@@ -55,7 +56,9 @@ class ClienteController extends Controller
 
     public function update(Request $request)
     {
-        if(!$request->ajax()) {return redirect('/');}
+        if (!$request->ajax()) {
+            return redirect('/');
+        }
         $persona = Persona::findOrFail($request->id);
         $persona->nombre = $request->nombre;
         $persona->tipo_documento = $request->tipo_documento;
@@ -67,4 +70,19 @@ class ClienteController extends Controller
         $persona->save();
     }
 
+    public function selectCliente(Request $request)
+    {
+        if (!$request->ajax()) {
+            return redirect('/');
+        }
+
+        $filtro = $request->filtro;
+
+        $clientes = Persona::where('nombre', 'like', '%' . $filtro . '%')
+            ->orWhere('num_documento', 'like', '%' . $filtro . '%')
+            ->select('id', 'nombre', 'num_documento')
+            ->orderBy('nombre', 'asc')->get();
+
+        return ['clientes' => $clientes];
+    }
 }

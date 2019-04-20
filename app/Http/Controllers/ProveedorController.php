@@ -81,6 +81,7 @@ class ProveedorController extends Controller
 
         return ['proveedores' => $proveedores];
     }
+
     public function store(Request $request)
     {
         if (!$request->ajax()) {

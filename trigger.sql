@@ -6,7 +6,7 @@ CREATE TRIGGER tr_updStockIngreso AFTER INSERT ON detalle_ingreso
  WHERE articulos.id = NEW.idarticulo;
 END
 //
-DELIMITER 
+DELIMITER ;
 
 -- Trigger actualizar stock cuando se anula el ingreso de productos
 DELIMITER // 
@@ -21,5 +21,25 @@ END;
 //
 DELIMITER ;
 
--- Borar Trigger
-DROP TRIGGER IF EXISTS name_trigger;
+-- Trigger actualizar stock cuando se venden productos
+DELIMITER // 
+CREATE TRIGGER tr_updStockVenta AFTER INSERT ON detalle_ventas
+ FOR EACH ROW BEGIN
+ UPDATE articulos SET stock = stock - NEW.cantidad
+ WHERE articulos.id = NEW.idarticulo;
+END
+//
+DELIMITER ;
+
+-- Trigger actualizar stock cuando se anula la venta
+DELIMITER // 
+CREATE TRIGGER tr_updStockVentaAnular AFTER UPDATE ON ventas FOR EACH ROW 
+BEGIN
+ UPDATE articulos a 
+  JOIN detalle_ventas dv
+   ON dv.idarticulo = a.id
+  AND dv.idventa = NEW.id
+  SET a.stock = a.stock + dv.cantidad;
+END;
+//
+DELIMITER ;
