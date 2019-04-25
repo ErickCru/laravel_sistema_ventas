@@ -70,6 +70,13 @@
                       >
                         <i class="icon-eye"></i>
                       </button>&nbsp;
+                      <button
+                        type="button"
+                        @click="pdfVenta(venta.id)"
+                        class="btn btn-info btn-sm"
+                      >
+                        <i class="icon-doc"></i>
+                      </button>&nbsp;
                       <template v-if="venta.estado=='Registrado'">
                         <button
                           type="button"
@@ -294,19 +301,19 @@
                       <td>{{ detalle.precio * detalle.cantidad - detalle.descuento}}</td>
                     </tr>
                     <tr>
-                      <td colspan="5" class="td-right">
+                      <td colspan="5" class="tr-right">
                         <strong>Total Parcial:</strong>
                       </td>
                       <td>$ {{ totalParcial = (total-totalImpuesto).toFixed(2) }}</td>
                     </tr>
                     <tr>
-                      <td colspan="5" class="td-right">
+                      <td colspan="5" class="tr-right">
                         <strong>Total Impuesto:</strong>
                       </td>
                       <td>$ {{ totalImpuesto = ((total*impuesto)/(1+impuesto)).toFixed(2) }}</td>
                     </tr>
                     <tr>
-                      <td colspan="5" class="td-right">
+                      <td colspan="5" class="tr-right">
                         <strong>Total Neto:</strong>
                       </td>
                       <td>$ {{ total = calcularTotal }}</td>
@@ -368,55 +375,56 @@
                 </div>
               </div>
             </div>
-          </div>
-          <div class="form-group row">
-            <div class="table-responsive col-md-12">
-              <table class="table table-bordered striped table-sm">
-                <thead>
-                  <th>Articulo</th>
-                  <th>Precio</th>
-                  <th>Cantidad</th>
-                  <th>Descuento</th>
-                  <th>Subtotal</th>
-                </thead>
-                <tbody v-if="arrayDetalle.length">
-                  <tr v-for="detalle in arrayDetalle" :key="detalle.id">
-                    <td v-text="detalle.articulo"></td>
-                    <td v-text="detalle.precio"></td>
-                    <td v-text="detalle.cantidad"></td>
-                    <td v-text="detalle.descuento"></td>
-                    <td>{{ detalle.precio * detalle.cantidad - detalle.descuento }}</td>
-                  </tr>
-                  <tr class="tr-right">
-                    <td colspan="4">
-                      <strong>Total Parcial:</strong>
-                    </td>
-                    <td>$ {{ totalParcial = (total-totalImpuesto).toFixed(2) }}</td>
-                  </tr>
-                  <tr class="tr-right">
-                    <td colspan="4">
-                      <strong>Total Impuesto:</strong>
-                    </td>
-                    <td>$ {{ totalImpuesto = (total*impuesto).toFixed(2) }}</td>
-                  </tr>
-                  <tr class="tr-right">
-                    <td colspan="4">
-                      <strong>Total Neto:</strong>
-                    </td>
-                    <td>$ {{total}}</td>
-                  </tr>
-                </tbody>
-                <tbody v-else>
-                  <tr>
-                    <td colspan="5">No hay artículos agregados</td>
-                  </tr>
-                </tbody>
-              </table>
+
+            <div class="form-group row">
+              <div class="table-responsive col-md-12">
+                <table class="table table-bordered striped table-sm">
+                  <thead>
+                    <th>Articulo</th>
+                    <th>Precio</th>
+                    <th>Cantidad</th>
+                    <th>Descuento</th>
+                    <th>Subtotal</th>
+                  </thead>
+                  <tbody v-if="arrayDetalle.length">
+                    <tr v-for="detalle in arrayDetalle" :key="detalle.id">
+                      <td v-text="detalle.articulo"></td>
+                      <td v-text="detalle.precio"></td>
+                      <td v-text="detalle.cantidad"></td>
+                      <td v-text="detalle.descuento"></td>
+                      <td>{{ detalle.precio * detalle.cantidad - detalle.descuento }}</td>
+                    </tr>
+                    <tr class="tr-right">
+                      <td colspan="4">
+                        <strong>Total Parcial:</strong>
+                      </td>
+                      <td>$ {{ totalParcial = (total-totalImpuesto).toFixed(2) }}</td>
+                    </tr>
+                    <tr class="tr-right">
+                      <td colspan="4">
+                        <strong>Total Impuesto:</strong>
+                      </td>
+                      <td>$ {{ totalImpuesto = (total*impuesto).toFixed(2) }}</td>
+                    </tr>
+                    <tr class="tr-right">
+                      <td colspan="4">
+                        <strong>Total Neto:</strong>
+                      </td>
+                      <td>$ {{total}}</td>
+                    </tr>
+                  </tbody>
+                  <tbody v-else>
+                    <tr>
+                      <td colspan="5">No hay artículos agregados</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
-          <div class="form-group row">
-            <div class="col-md-12">
-              <button type="button" @click="ocultarDetalle()" class="btn btn-secondary">Cerrar</button>
+            <div class="form-group row">
+              <div class="col-md-12">
+                <button type="button" @click="ocultarDetalle()" class="btn btn-secondary">Cerrar</button>
+              </div>
             </div>
           </div>
         </template>
@@ -700,6 +708,9 @@ export default {
           console.log(error);
         });
     },
+    pdfVenta(id) {
+      window.open(`http://localhost:8000/venta/pdf/${id}, _blank`);
+    },
     cambiarPagina(page, buscar, criterio) {
       let me = this;
       me.pagination.current_page = page;
@@ -838,6 +849,9 @@ export default {
           me.codigo = "";
           me.descuento = 0;
           me.arrayDetalle = [];
+          window.open(
+            `http://localhost:8000/venta/pdf/${response.data.id}, _blank`
+          );
         })
         .catch(function(error) {
           console.log(error);
@@ -939,7 +953,6 @@ export default {
       this.modal = 1;
       this.tituloModal = "Seleccione uno o varios artículos";
     },
-
     cerrarModal() {
       this.modal = 0;
       this.titulo = 0;
@@ -1020,7 +1033,7 @@ th {
   text-align: center;
 }
 .tr-right {
-  background-color: #ceecf5;
+  background-color: #a1e5fa;
   text-align: right;
 }
 @media (min-width: 600px) {

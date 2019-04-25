@@ -280,19 +280,19 @@
                       <td>{{ detalle.precio * detalle.cantidad}}</td>
                     </tr>
                     <tr>
-                      <td colspan="4" class="td-right">
+                      <td colspan="4" class="tr-right">
                         <strong>Total Parcial:</strong>
                       </td>
                       <td>$ {{ totalParcial = (total-totalImpuesto).toFixed(2) }}</td>
                     </tr>
                     <tr>
-                      <td colspan="4" class="td-right">
+                      <td colspan="4" class="tr-right">
                         <strong>Total Impuesto:</strong>
                       </td>
                       <td>$ {{ totalImpuesto = ((total*impuesto)/(1+impuesto)).toFixed(2) }}</td>
                     </tr>
                     <tr>
-                      <td colspan="4" class="td-right">
+                      <td colspan="4" class="tr-right">
                         <strong>Total Neto:</strong>
                       </td>
                       <td>$ {{ total = calcularTotal }}</td>
@@ -354,53 +354,54 @@
                 </div>
               </div>
             </div>
-          </div>
-          <div class="form-group row">
-            <div class="table-responsive col-md-12">
-              <table class="table table-bordered striped table-sm">
-                <thead>
-                  <th>Articulo</th>
-                  <th>Precio</th>
-                  <th>Cantidad</th>
-                  <th>Subtotal</th>
-                </thead>
-                <tbody v-if="arrayDetalle.length">
-                  <tr v-for="detalle in arrayDetalle" :key="detalle.id">
-                    <td v-text="detalle.articulo"></td>
-                    <td v-text="detalle.precio"></td>
-                    <td v-text="detalle.cantidad"></td>
-                    <td>{{ detalle.precio * detalle.cantidad}}</td>
-                  </tr>
-                  <tr class="tr-right">
-                    <td colspan="3">
-                      <strong>Total Parcial:</strong>
-                    </td>
-                    <td>$ {{ totalParcial = (total-totalImpuesto).toFixed(2) }}</td>
-                  </tr>
-                  <tr class="tr-right">
-                    <td colspan="3">
-                      <strong>Total Impuesto:</strong>
-                    </td>
-                    <td>$ {{ totalImpuesto = (total*impuesto).toFixed(2) }}</td>
-                  </tr>
-                  <tr class="tr-right">
-                    <td colspan="3">
-                      <strong>Total Neto:</strong>
-                    </td>
-                    <td>$ {{total}}</td>
-                  </tr>
-                </tbody>
-                <tbody v-else>
-                  <tr>
-                    <td colspan="5">No hay artículos agregados</td>
-                  </tr>
-                </tbody>
-              </table>
+
+            <div class="form-group row">
+              <div class="table-responsive col-md-12">
+                <table class="table table-bordered striped table-sm">
+                  <thead>
+                    <th>Articulo</th>
+                    <th>Precio</th>
+                    <th>Cantidad</th>
+                    <th>Subtotal</th>
+                  </thead>
+                  <tbody v-if="arrayDetalle.length">
+                    <tr v-for="detalle in arrayDetalle" :key="detalle.id">
+                      <td v-text="detalle.articulo"></td>
+                      <td v-text="detalle.precio"></td>
+                      <td v-text="detalle.cantidad"></td>
+                      <td>{{ detalle.precio * detalle.cantidad}}</td>
+                    </tr>
+                    <tr class="tr-right">
+                      <td colspan="3">
+                        <strong>Total Parcial:</strong>
+                      </td>
+                      <td>$ {{ totalParcial = (total-totalImpuesto).toFixed(2) }}</td>
+                    </tr>
+                    <tr class="tr-right">
+                      <td colspan="3">
+                        <strong>Total Impuesto:</strong>
+                      </td>
+                      <td>$ {{ totalImpuesto = (total*impuesto).toFixed(2) }}</td>
+                    </tr>
+                    <tr class="tr-right">
+                      <td colspan="3">
+                        <strong>Total Neto:</strong>
+                      </td>
+                      <td>$ {{total}}</td>
+                    </tr>
+                  </tbody>
+                  <tbody v-else>
+                    <tr>
+                      <td colspan="5">No hay artículos agregados</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
-          <div class="form-group row">
-            <div class="col-md-12">
-              <button type="button" @click="ocultarDetalle()" class="btn btn-secondary">Cerrar</button>
+            <div class="form-group row">
+              <div class="col-md-12">
+                <button type="button" @click="ocultarDetalle()" class="btn btn-secondary">Cerrar</button>
+              </div>
             </div>
           </div>
         </template>
