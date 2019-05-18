@@ -27,6 +27,9 @@ Route::group(['middleware' => ['auth']], function () {
         return view('contenido/contenido');
     })->name('main');
 
+    Route::post('/notification/get', 'NotificationController@get');
+
+
     Route::group(['middleware' => ['Almacenero']], function () {
         Route::get('/categoria', 'CategoriaCotroller@index');
         Route::post('/categoria/registrar', 'CategoriaCotroller@store');
