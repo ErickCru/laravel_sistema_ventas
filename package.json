@@ -28,6 +28,6 @@
     "laravel-echo-server": "^1.5.0",
     "pusher-js": "^4.4.0",
     "vue-barcode": "^1.2.0",
-    "vue-select": "^3.0.2"
+    "vue-select": "^3.10.8"
   }
 }
