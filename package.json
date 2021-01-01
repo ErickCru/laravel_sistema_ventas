@@ -24,7 +24,7 @@
     "vue-template-compiler": "^2.6.8"
   },
   "dependencies": {
-    "laravel-echo": "^1.5.3",
+    "laravel-echo": "^1.10.0",
     "laravel-echo-server": "^1.5.0",
     "pusher-js": "^4.4.0",
     "vue-barcode": "^1.2.0",
